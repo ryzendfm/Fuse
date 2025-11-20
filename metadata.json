@@ -1,0 +1,5 @@
+{
+  "name": "Fuse",
+  "description": "A premium streaming dashboard for Movies and TV Shows featuring a modern dark UI, infinite scrolling, and dynamic content integration with TMDB.",
+  "requestFramePermissions": []
+}
