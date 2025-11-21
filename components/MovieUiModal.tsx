@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, FC } from 'react';
 import { ContentItem, ContentDetails, CastMember, Episode, MediaType } from '../types';
 import { fetchDetails, fetchCredits, fetchSeason } from '../services/tmdbService';
 import { BACK_BASE, IMG_BASE, CAST_BASE } from '../constants';
@@ -9,7 +9,7 @@ interface MovieUiModalProps {
     onClose: () => void;
 }
 
-const MovieUiModal: React.FC<MovieUiModalProps> = ({ item, type, onClose }) => {
+const MovieUiModal: FC<MovieUiModalProps> = ({ item, type, onClose }) => {
     const [details, setDetails] = useState<ContentDetails | null>(null);
     const [cast, setCast] = useState<CastMember[]>([]);
     const [currentSeason, setCurrentSeason] = useState(1);
@@ -100,7 +100,7 @@ const MovieUiModal: React.FC<MovieUiModalProps> = ({ item, type, onClose }) => {
     const year = (item.release_date || item.first_air_date || 'N/A').split('-')[0];
     
     return (
-        <div className="fixed inset-0 z-50 bg-black overflow-y-auto animate-fade-in">
+        <div className="fixed inset-0 z-50 bg-black overflow-y-auto animate-fade-in scrollbar-hide">
              {/* Top Navigation Overlay */}
              <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-start z-20">
                 <button onClick={onClose} className="w-10 h-10 rounded-full bg-black/50 backdrop-blur flex items-center justify-center hover:bg-white/20 transition text-white">
@@ -155,7 +155,7 @@ const MovieUiModal: React.FC<MovieUiModalProps> = ({ item, type, onClose }) => {
                      <div className="absolute right-8 -top-8 z-20">
                         <button 
                             onClick={() => handlePlay(currentSeason, currentEpisode)} 
-                            className="w-16 h-16 rounded-full bg-[#46d369] flex items-center justify-center shadow-[0_8px_24px_rgba(70,211,105,0.5)] hover:scale-110 transition-transform active:scale-95"
+                            className="w-16 h-16 rounded-full bg-[#46d369] flex items-center justify-center hover:scale-110 transition-transform active:scale-95"
                         >
                             <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                         </button>

@@ -1,4 +1,4 @@
-import React from 'react';
+import { FC } from 'react';
 import { ContentItem } from '../types';
 import { BACK_BASE } from '../constants';
 
@@ -7,11 +7,11 @@ interface HeroProps {
     onPlay: () => void;
 }
 
-const Hero: React.FC<HeroProps> = ({ item, onPlay }) => {
+const Hero: FC<HeroProps> = ({ item, onPlay }) => {
     if (!item) return null;
 
     return (
-        <div className="relative w-full h-[55vh] md:h-[70vh] group">
+        <div className="relative w-full h-[65vh] min-h-[550px] md:h-[70vh] group">
             <img 
                 src={`${BACK_BASE}${item.backdrop_path}`} 
                 alt={item.title || item.name}

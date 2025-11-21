@@ -1,6 +1,6 @@
-import React from 'react';
+import { FC } from 'react';
 
-const Sidebar: React.FC = () => {
+const Sidebar: FC = () => {
     const items = ['Action', 'Comedy', 'Sci-Fi', 'Horror', 'Drama', 'Anime', 'Thriller', 'Romance'];
 
     return (

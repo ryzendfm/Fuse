@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, FC, FormEvent } from 'react';
 import { supabase } from '../services/supabaseClient';
 
 interface NavbarProps {
     onSearch: (query: string) => void;
     onLogoClick?: () => void;
+    session: any;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onSearch, onLogoClick }) => {
+const Navbar: FC<NavbarProps> = ({ onSearch, onLogoClick, session }) => {
     const [inputValue, setInputValue] = useState('');
     const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -32,7 +33,7 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch, onLogoClick }) => {
         };
     }, []);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         if (inputValue.trim()) {
             onSearch(inputValue);
@@ -57,6 +58,8 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch, onLogoClick }) => {
             window.location.reload();
         }
     };
+
+    const avatarLetter = session?.user?.email?.[0]?.toUpperCase() || 'U';
 
     return (
         <nav 
@@ -151,18 +154,16 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch, onLogoClick }) => {
                             className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2b2b30] to-[#1f1f22] border border-white/10 shadow-lg flex items-center justify-center group overflow-hidden"
                         >
                              <div className="w-full h-full rounded-full bg-gradient-to-br from-[#46d369]/80 to-[#2ea043]/80 opacity-0 group-hover:opacity-100 transition-opacity absolute inset-0"></div>
-                             <span className="relative font-bold text-sm text-gray-300 group-hover:text-white">U</span>
+                             <span className="relative font-bold text-lg text-gray-300 group-hover:text-white leading-none pt-0.5">{avatarLetter}</span>
                         </button>
                         {isUserMenuOpen && (
                             <>
                                 <div className="fixed inset-0 z-40" onClick={() => setIsUserMenuOpen(false)}></div>
                                 <div className="absolute right-0 top-14 w-56 bg-[#1f1f22] border border-white/10 rounded-xl shadow-2xl py-2 z-50 animate-fade-in">
                                     <div className="px-4 py-3 border-b border-white/5 mb-1">
-                                        <p className="text-sm text-white font-bold">My Account</p>
+                                        <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Signed in as</p>
+                                        <p className="text-sm text-white font-bold truncate">{session?.user?.email}</p>
                                     </div>
-                                    <a href="#" className="block px-4 py-2.5 text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors">Profile</a>
-                                    <a href="#" className="block px-4 py-2.5 text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors">Settings</a>
-                                    <div className="h-px bg-white/5 my-1"></div>
                                     <button onClick={handleLogout} className="block w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors">
                                         Sign Out
                                     </button>

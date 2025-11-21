@@ -1,4 +1,4 @@
-import React from 'react';
+import { FC } from 'react';
 import { ContentItem } from '../types';
 import { IMG_BASE } from '../constants';
 
@@ -7,7 +7,7 @@ interface ContentGridProps {
     onItemClick: (item: ContentItem) => void;
 }
 
-const ContentGrid: React.FC<ContentGridProps> = ({ items, onItemClick }) => {
+const ContentGrid: FC<ContentGridProps> = ({ items, onItemClick }) => {
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-20">
             {items.map((item) => {

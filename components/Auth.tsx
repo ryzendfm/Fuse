@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState, FC, FormEvent } from 'react';
 import { supabase } from '../services/supabaseClient';
 
-const Auth: React.FC = () => {
+const Auth: FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -9,7 +9,7 @@ const Auth: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [message, setMessage] = useState<string | null>(null);
 
-    const handleAuth = async (e: React.FormEvent) => {
+    const handleAuth = async (e: FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
