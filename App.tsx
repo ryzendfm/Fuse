@@ -25,6 +25,7 @@ const App: FC = () => {
     const [loading, setLoading] = useState(false);
     const [activeGenre, setActiveGenre] = useState<number | undefined>(undefined);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
     
     const [selectedItem, setSelectedItem] = useState<ContentItem | null>(null);
 
@@ -128,13 +129,6 @@ const App: FC = () => {
         }
     };
 
-    const handleSwitchType = (type: MediaType) => {
-        setViewType(type);
-        setActiveTab(type);
-        setActiveGenre(undefined);
-        setSearchQuery('');
-    };
-
     const handleMobileTabChange = (tab: string) => {
         setActiveTab(tab);
         if (tab === 'movie') {
@@ -146,7 +140,7 @@ const App: FC = () => {
             setActiveGenre(undefined);
             setSearchQuery('');
         }
-        // Library and Recent are separate views
+        // Library and Recent are separate views handled in render
     };
 
     const handleLogoClick = () => {
@@ -185,41 +179,29 @@ const App: FC = () => {
                 onSearch={handleSearch} 
                 onLogoClick={handleLogoClick}
                 session={session}
+                isSidebarExpanded={isSidebarExpanded}
+                isModalOpen={!!selectedItem}
             />
 
-            <Sidebar />
+            <Sidebar 
+                activeTab={activeTab}
+                onTabChange={handleMobileTabChange}
+                activeGenre={activeGenre}
+                onGenreChange={handleGenreClick}
+                isExpanded={isSidebarExpanded}
+                onHover={setIsSidebarExpanded}
+            />
 
-            <main className="flex-1 overflow-y-auto relative bg-[#0e0e10] scroll-smooth pb-20 md:pb-0" id="mainContainer">
+            <main 
+                className={`flex-1 overflow-y-auto relative bg-[#0e0e10] scroll-smooth pb-20 md:pb-0 transition-all duration-300 ${isSidebarExpanded ? 'md:pl-64' : 'md:pl-20'}`} 
+                id="mainContainer"
+            >
                 
                 {/* Content Logic based on Tab */}
                 {(activeTab === 'movie' || activeTab === 'tv') ? (
                     <>
                         {/* Hero Section: Visible on Home AND Genre views, hidden on Search */}
                         {!searchQuery && <Hero item={heroItem} onPlay={() => handleItemClick(heroItem!)} />}
-
-                        {/* Desktop Toggle - HIDDEN ON MOBILE */}
-                        <div className={`hidden md:flex justify-center relative z-20 mb-8 pointer-events-none ${!searchQuery ? '-mt-8' : 'mt-24'}`}>
-                            <div className="flex bg-black/60 backdrop-blur-xl border border-white/10 p-1.5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] pointer-events-auto">
-                                <button 
-                                    onClick={() => handleSwitchType('movie')} 
-                                    className={`relative px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 overflow-hidden group ${viewType === 'movie' ? 'text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
-                                >
-                                    {viewType === 'movie' && (
-                                        <div className="absolute inset-0 bg-gradient-to-r from-[#46d369] to-[#2ea043] animate-fade-in -z-10"></div>
-                                    )}
-                                    Movies
-                                </button>
-                                <button 
-                                    onClick={() => handleSwitchType('tv')} 
-                                    className={`relative px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 overflow-hidden group ${viewType === 'tv' ? 'text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
-                                >
-                                    {viewType === 'tv' && (
-                                        <div className="absolute inset-0 bg-gradient-to-r from-[#46d369] to-[#2ea043] animate-fade-in -z-10"></div>
-                                    )}
-                                    TV Shows
-                                </button>
-                            </div>
-                        </div>
                         
                         {/* Mobile Spacer for when toggle is hidden and we are in search/grid mode */}
                         <div className={`md:hidden h-20 ${!searchQuery ? 'hidden' : 'block'}`}></div>
@@ -233,7 +215,8 @@ const App: FC = () => {
                                     {searchQuery ? `Results for "${searchQuery}"` : (activeGenre ? `${GENRES.find(g => g.id === activeGenre)?.name || 'Genre'} ${viewType === 'movie' ? 'Movies' : 'Shows'}` : `Trending ${viewType === 'movie' ? 'Movies' : 'TV Shows'}`)}
                                 </h2>
                                 
-                                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                                {/* Mobile Genre Scroll - Desktop handled by sidebar */}
+                                <div className="flex md:hidden gap-4 overflow-x-auto pb-2 scrollbar-hide">
                                     <button 
                                         onClick={() => handleGenreClick(undefined)}
                                         className={`text-sm font-medium transition-colors whitespace-nowrap px-3 py-1 rounded-lg ${!activeGenre ? 'bg-white text-black' : 'bg-[#1f1f22] text-gray-400 hover:bg-[#333] hover:text-white'}`}
@@ -336,7 +319,8 @@ const App: FC = () => {
                 <MovieUiModal 
                     item={selectedItem} 
                     type={selectedItem.media_type as MediaType || viewType} 
-                    onClose={() => setSelectedItem(null)} 
+                    onClose={() => setSelectedItem(null)}
+                    isSidebarExpanded={isSidebarExpanded}
                 />
             )}
         </div>

@@ -1,6 +1,6 @@
 
-export const TMDB_KEY = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2YzM5ZDZiNDI0MmVkYWYwYTZlNmY5ZTRiNTZlZGE2NiIsIm5iZiI6MTc0NDY4Mzc1NS43NDQsInN1YiI6IjY3ZmRjMmViNDM3ZjBiODBlZWFkMWFmYiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.uMctgq0xQnSLn10OJm9-twooBoOB_jZmRpRXH0jXTuU';
-export const DEMO_KEY = '15d2ea6d0dc1d476efbca3eba2b9bbfb';
+export const TMDB_KEY = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyOWNiN2Y4YTcwZGY4ZGNlNTQ1MmUyNjI1NmY5Yjg1MiIsIm5iZiI6MTYzMzQ0NzgwNSwic3ViIjoiNjEzNjViNTY5ODg1N2YwMDA2YmE2ZDU4Iiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.9jC3tOqYc8o2Z3d5g7q4d3b7q9x5c6d7e8f9g0h1i2';
+export const DEMO_KEY = '4f298a53e552283bee957836a529baec';
 export const BASE_URL = 'https://api.themoviedb.org/3';
 export const IMG_BASE = 'https://image.tmdb.org/t/p/w500';
 export const BACK_BASE = 'https://image.tmdb.org/t/p/original';

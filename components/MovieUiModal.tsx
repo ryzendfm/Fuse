@@ -7,9 +7,10 @@ interface MovieUiModalProps {
     item: ContentItem | null;
     type: MediaType;
     onClose: () => void;
+    isSidebarExpanded: boolean;
 }
 
-const MovieUiModal: FC<MovieUiModalProps> = ({ item, type, onClose }) => {
+const MovieUiModal: FC<MovieUiModalProps> = ({ item, type, onClose, isSidebarExpanded }) => {
     const [details, setDetails] = useState<ContentDetails | null>(null);
     const [cast, setCast] = useState<CastMember[]>([]);
     const [currentSeason, setCurrentSeason] = useState(1);
@@ -78,6 +79,7 @@ const MovieUiModal: FC<MovieUiModalProps> = ({ item, type, onClose }) => {
         }
         setShowPlayer(true);
         setIsPlayerLoading(true);
+        window.history.pushState({ modal: 'player' }, '', window.location.pathname + '#watch');
     };
 
     const getStreamUrl = () => {
@@ -93,6 +95,17 @@ const MovieUiModal: FC<MovieUiModalProps> = ({ item, type, onClose }) => {
         }
     };
 
+    // Handle back button for player
+    useEffect(() => {
+        const handlePopState = (event: PopStateEvent) => {
+            if (showPlayer) {
+                setShowPlayer(false);
+            }
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, [showPlayer]);
+
     if (!item) return null;
 
     const backdropUrl = item.backdrop_path ? `${BACK_BASE}${item.backdrop_path}` : (item.poster_path ? `${IMG_BASE}${item.poster_path}` : '');
@@ -100,9 +113,9 @@ const MovieUiModal: FC<MovieUiModalProps> = ({ item, type, onClose }) => {
     const year = (item.release_date || item.first_air_date || 'N/A').split('-')[0];
     
     return (
-        <div className="fixed inset-0 z-50 bg-black overflow-y-auto animate-fade-in scrollbar-hide">
+        <div className={`fixed top-0 md:top-[70px] left-0 right-0 bottom-0 z-[120] md:z-50 bg-black overflow-y-auto animate-fade-in scrollbar-hide transition-all duration-300 ${isSidebarExpanded ? 'md:pl-64' : 'md:pl-20'}`}>
              {/* Top Navigation Overlay */}
-             <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-start z-20">
+             <div className={`absolute top-0 left-0 w-full p-4 flex justify-between items-start z-20 transition-all duration-300 ${isSidebarExpanded ? 'md:pl-[272px]' : 'md:pl-24'}`}>
                 <button onClick={onClose} className="w-10 h-10 rounded-full bg-black/50 backdrop-blur flex items-center justify-center hover:bg-white/20 transition text-white">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
@@ -133,7 +146,10 @@ const MovieUiModal: FC<MovieUiModalProps> = ({ item, type, onClose }) => {
                             onLoad={() => setIsPlayerLoading(false)}
                         ></iframe>
                         <button 
-                            onClick={() => setShowPlayer(false)} 
+                            onClick={() => {
+                                setShowPlayer(false);
+                                window.history.back();
+                            }} 
                             className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all z-40"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

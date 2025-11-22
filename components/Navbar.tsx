@@ -5,11 +5,13 @@ interface NavbarProps {
     onSearch: (query: string) => void;
     onLogoClick?: () => void;
     session: any;
+    isSidebarExpanded: boolean;
+    isModalOpen?: boolean;
 }
 
-const Navbar: FC<NavbarProps> = ({ onSearch, onLogoClick, session }) => {
+const Navbar: FC<NavbarProps> = ({ onSearch, onLogoClick, session, isSidebarExpanded, isModalOpen }) => {
     const [inputValue, setInputValue] = useState('');
-    const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
@@ -37,7 +39,7 @@ const Navbar: FC<NavbarProps> = ({ onSearch, onLogoClick, session }) => {
         e.preventDefault();
         if (inputValue.trim()) {
             onSearch(inputValue);
-            setIsMobileSearchOpen(false);
+            setIsSearchOpen(false);
         }
     };
 
@@ -63,14 +65,14 @@ const Navbar: FC<NavbarProps> = ({ onSearch, onLogoClick, session }) => {
 
     return (
         <nav 
-            className={`fixed top-0 left-0 right-0 h-[70px] z-50 flex items-center px-4 md:px-8 transition-all duration-300 ${scrolled ? 'bg-[#0e0e10]/95 backdrop-blur-md' : 'bg-gradient-to-b from-black/90 via-black/60 to-transparent'}`}
+            className={`fixed top-0 left-0 right-0 h-[70px] z-[100] flex items-center px-4 md:pr-8 transition-all duration-300 ${isSidebarExpanded ? 'md:pl-72' : 'md:pl-28'} ${(scrolled || isSearchOpen || isModalOpen) ? 'bg-[#0e0e10]/95 backdrop-blur-md' : 'bg-gradient-to-b from-black/90 via-black/60 to-transparent'}`}
         >
-            {/* Mobile Search Overlay in Navbar */}
-            {isMobileSearchOpen && (
-                <div className="w-full flex items-center md:hidden animate-fade-in">
-                    <form onSubmit={handleSubmit} className="relative flex-1 group">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Universal Search Overlay */}
+            {isSearchOpen && (
+                <div className="w-full flex items-center animate-fade-in justify-center">
+                    <form onSubmit={handleSubmit} className="relative flex-1 max-w-2xl group">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                            <svg className="w-5 h-5 text-gray-400 group-focus-within:text-[#46d369] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
                         </div>
@@ -78,8 +80,8 @@ const Navbar: FC<NavbarProps> = ({ onSearch, onLogoClick, session }) => {
                             type="text" 
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
-                            className="w-full bg-[#1f1f22] border border-transparent focus:border-[#46d369]/50 text-white text-sm rounded-xl py-2.5 pl-10 pr-20 shadow-inner focus:bg-[#18181b] focus:ring-2 focus:ring-[#46d369]/20 focus:outline-none transition-all duration-300 placeholder-gray-500 font-medium" 
-                            placeholder="Search..." 
+                            className="w-full bg-[#1f1f22] border border-white/10 focus:border-[#46d369]/50 text-white text-base rounded-full py-2.5 pl-12 pr-24 shadow-2xl focus:bg-black focus:ring-2 focus:ring-[#46d369]/20 focus:outline-none transition-all duration-300 placeholder-gray-500 font-medium" 
+                            placeholder="Search for movies, shows..." 
                             autoFocus
                         />
                         <div className="absolute inset-y-0 right-0 flex items-center pr-2 gap-1">
@@ -87,15 +89,15 @@ const Navbar: FC<NavbarProps> = ({ onSearch, onLogoClick, session }) => {
                                 <button 
                                     type="button"
                                     onClick={clearSearch}
-                                    className="p-1 text-gray-500 hover:text-white transition-colors"
+                                    className="p-2 text-gray-500 hover:text-white transition-colors"
                                 >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                 </button>
                             )}
                             <button 
                                 type="button"
-                                onClick={() => setIsMobileSearchOpen(false)}
-                                className="text-xs font-bold text-gray-400 hover:text-white px-2 py-1 rounded hover:bg-white/10 transition-colors"
+                                onClick={() => setIsSearchOpen(false)}
+                                className="text-xs font-bold text-gray-400 hover:text-white px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors uppercase tracking-wide"
                             >
                                 Cancel
                             </button>
@@ -105,7 +107,7 @@ const Navbar: FC<NavbarProps> = ({ onSearch, onLogoClick, session }) => {
             )}
 
             {/* Standard Navbar Content */}
-            <div className={`relative flex items-center justify-between w-full h-full ${isMobileSearchOpen ? 'hidden md:flex' : 'flex'}`}>
+            <div className={`relative flex items-center justify-between w-full h-full ${isSearchOpen ? 'hidden' : 'flex'}`}>
                 <div className="flex items-center gap-2 cursor-pointer group select-none relative z-10" onClick={handleLogoAction}>
                     <span 
                         className="text-white text-2xl md:text-3xl tracking-tighter group-hover:text-[#46d369] transition-colors drop-shadow-md"
@@ -115,46 +117,28 @@ const Navbar: FC<NavbarProps> = ({ onSearch, onLogoClick, session }) => {
                     </span>
                 </div>
 
-                {/* Desktop Search Bar */}
-                <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-[400px] lg:max-w-[600px] hidden md:block z-0">
-                    <form onSubmit={handleSubmit} className="relative w-full group">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                            <svg className="w-5 h-5 text-gray-500 group-focus-within:text-[#46d369] transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
-                        </div>
-                        <input 
-                            type="text" 
-                            value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
-                            className="w-full bg-[#1f1f22] border border-transparent focus:border-[#46d369]/50 text-white text-sm rounded-xl py-3 pl-12 pr-10 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] focus:bg-[#18181b] focus:ring-4 focus:ring-[#46d369]/10 focus:outline-none transition-all duration-300 placeholder-gray-500 font-medium" 
-                            placeholder="Search for movies, shows..." 
-                        />
-                        {inputValue && (
-                             <button 
-                                type="button"
-                                onClick={clearSearch}
-                                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-white transition-colors"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                            </button>
-                        )}
-                    </form>
-                </div>
-
-                <div className="flex items-center gap-4 relative z-10">
-                    <button className="md:hidden p-2 text-white drop-shadow-md hover:bg-white/10 rounded-lg transition-colors" onClick={() => setIsMobileSearchOpen(true)}>
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {/* Right Section */}
+                <div className="flex items-center gap-2 md:gap-4 ml-auto relative z-10">
+                    
+                    {/* Search Trigger Button */}
+                    <button 
+                        className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 text-white transition-colors drop-shadow-md" 
+                        onClick={() => setIsSearchOpen(true)}
+                        aria-label="Search"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </button>
-                    <div className="relative">
+                    
+                    {/* Profile Button */}
+                    <div className="relative h-10 w-10 flex items-center justify-center">
                         <button 
                             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} 
-                            className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2b2b30] to-[#1f1f22] border border-white/10 shadow-lg flex items-center justify-center group overflow-hidden"
+                            className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2b2b30] to-[#1f1f22] border border-white/10 shadow-lg flex items-center justify-center group overflow-hidden shrink-0"
                         >
-                             <div className="w-full h-full rounded-full bg-gradient-to-br from-[#46d369]/80 to-[#2ea043]/80 opacity-0 group-hover:opacity-100 transition-opacity absolute inset-0"></div>
-                             <span className="relative font-bold text-lg text-gray-300 group-hover:text-white leading-none pt-0.5">{avatarLetter}</span>
+                                <div className="w-full h-full rounded-full bg-gradient-to-br from-[#46d369]/80 to-[#2ea043]/80 opacity-0 group-hover:opacity-100 transition-opacity absolute inset-0"></div>
+                                <span className="relative font-bold text-lg text-gray-300 group-hover:text-white leading-none pt-0.5">{avatarLetter}</span>
                         </button>
                         {isUserMenuOpen && (
                             <>
