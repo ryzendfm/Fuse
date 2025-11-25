@@ -6,6 +6,7 @@ import Sidebar from './components/Sidebar';
 import Hero from './components/Hero';
 import ContentGrid from './components/ContentGrid';
 import MovieUiModal from './components/MovieUiModal';
+import SearchBanner from './components/SearchBanner';
 import { HeroSkeleton, GridSkeleton } from './components/Skeletons';
 import { fetchDiscover, fetchSearch } from './services/tmdbService';
 import { ContentItem, MediaType } from './types';
@@ -174,10 +175,16 @@ const App: FC = () => {
         return <Auth />;
     }
 
-    // Determine Logic:
-    // We want to show the Hero space if we are NOT searching.
-    // If data is loading and we aren't searching, we show a Skeleton Hero.
-    const shouldShowHeroSpace = !searchQuery;
+    // Logic:
+    // 1. Show Home Hero if !searchQuery
+    // 2. Show Search Banner if searchQuery AND results exist
+    const showSearchBanner = !!(searchQuery && contentList.length > 0);
+    const searchBannerItem = showSearchBanner ? contentList[0] : null;
+    const isSearchLoading = searchQuery && loading && page === 1;
+
+    // We apply Top Padding ONLY if we have NO Hero, NO Search Banner, and aren't waiting for the initial search load (which shows a skeleton).
+    // Basically, if the top visual element is missing, we need padding to clear the navbar.
+    const needsTopPadding = !(!searchQuery || showSearchBanner || isSearchLoading);
 
     return (
         <div className="flex h-screen overflow-hidden bg-[#0e0e10] text-white font-inter">
@@ -206,23 +213,32 @@ const App: FC = () => {
                 {/* Content Logic based on Tab */}
                 {(activeTab === 'movie' || activeTab === 'tv') ? (
                     <>
-                        {/* Hero Section */}
-                        {shouldShowHeroSpace && (
+                        {/* 1. Home Hero */}
+                        {!searchQuery && (
                             heroItem ? (
                                 <Hero item={heroItem} onPlay={() => handleItemClick(heroItem!)} />
                             ) : (
                                 <HeroSkeleton />
                             )
                         )}
-                        
-                        {/* Mobile Spacer for when toggle is hidden and we are in search/grid mode or loading */}
-                        <div className={`md:hidden h-20 ${shouldShowHeroSpace ? 'hidden' : 'block'}`}></div>
 
-                        {/* Content Wrapper with Padding. 
-                            When Hero is hidden (search active), we need ample top padding to clear the fixed navbar. 
-                            pt-32 (128px) ensures the content starts well below the 70px navbar.
-                        */}
-                        <div className={`relative z-10 px-4 md:px-8 ${shouldShowHeroSpace ? 'mt-0' : 'pt-32 md:pt-36'}`}>
+                        {/* 2. Search Banner */}
+                        {showSearchBanner && searchBannerItem && (
+                            <SearchBanner item={searchBannerItem} onClick={() => handleItemClick(searchBannerItem)} />
+                        )}
+
+                        {/* 2b. Search Loading State (Top Banner Skeleton) */}
+                        {isSearchLoading && (
+                            <div className="w-full h-[40vh] min-h-[300px] bg-[#1f1f22] animate-pulse relative">
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e10] to-transparent"></div>
+                            </div>
+                        )}
+                        
+                        {/* Mobile Spacer (visible only if no visual header is present) */}
+                        <div className={`md:hidden h-20 ${(!searchQuery || showSearchBanner || isSearchLoading) ? 'hidden' : 'block'}`}></div>
+
+                        {/* Content Wrapper */}
+                        <div className={`relative z-10 px-4 md:px-8 ${needsTopPadding ? 'pt-24 md:pt-32' : 'mt-0'}`}>
                             
                             {/* Filter/Header Section */}
                             <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
@@ -230,7 +246,7 @@ const App: FC = () => {
                                     {searchQuery ? `Results for "${searchQuery}"` : (activeGenre ? `${GENRES.find(g => g.id === activeGenre)?.name || 'Genre'} ${viewType === 'movie' ? 'Movies' : 'Shows'}` : `Trending ${viewType === 'movie' ? 'Movies' : 'TV Shows'}`)}
                                 </h2>
                                 
-                                {/* Mobile Genre Scroll - Desktop handled by sidebar */}
+                                {/* Mobile Genre Scroll */}
                                 {!searchQuery && (
                                     <div className="flex md:hidden gap-4 overflow-x-auto pb-2 scrollbar-hide">
                                         <button 
@@ -252,14 +268,14 @@ const App: FC = () => {
                                 )}
                             </div>
 
-                            {/* Content Grid with Skeleton Loader */}
+                            {/* Content Grid */}
                             {loading && page === 1 ? (
                                 <GridSkeleton />
                             ) : (
                                 <ContentGrid items={contentList} onItemClick={handleItemClick} />
                             )}
 
-                            {/* Load More Spinner (only for pagination) */}
+                            {/* Load More */}
                             {loading && page > 1 && (
                                 <div className="py-12 flex justify-center w-full">
                                     <div className="animate-spin w-8 h-8 border-4 border-[#333] border-t-[#46d369] rounded-full"></div>
@@ -279,7 +295,7 @@ const App: FC = () => {
                         </div>
                     </>
                 ) : (
-                    // Placeholder Views for Library and Recent
+                    // Placeholder Views
                     <div className="h-full flex flex-col items-center justify-center p-8 text-center animate-fade-in mt-10 md:mt-0">
                         <div className="w-24 h-24 bg-[#1f1f22]/50 rounded-full flex items-center justify-center mb-6">
                             {activeTab === 'library' ? (
