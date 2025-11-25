@@ -204,18 +204,36 @@ const MovieUiModal: FC<MovieUiModalProps> = ({ item, type, onClose, isSidebarExp
 
                         {/* Cast */}
                         <div className="mb-8 slide-up" style={{ animationDelay: '0.2s' }}>
-                            <h3 className="text-white font-bold text-lg mb-3">Casts</h3>
-                            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-                                {cast.slice(0, 10).map(c => (
-                                    <div key={c.id} className="flex flex-col items-center gap-1 min-w-[70px]">
-                                        <img 
-                                            src={c.profile_path ? `${CAST_BASE}${c.profile_path}` : 'https://via.placeholder.com/60'} 
-                                            className="w-[60px] h-[60px] rounded-full object-cover border-2 border-[#333]" 
-                                            alt={c.name}
-                                        />
-                                        <span className="text-[10px] text-gray-400 text-center leading-tight line-clamp-1">{c.name}</span>
+                            <div className="flex items-center gap-3 mb-4">
+                                <h3 className="text-white font-bold text-lg">Top Cast</h3>
+                                <span className="px-2 py-0.5 bg-[#1f1f22] border border-white/10 rounded-full text-[10px] text-gray-400 font-medium">
+                                    {cast.length}
+                                </span>
+                            </div>
+                            
+                            {/* Horizontal Scroll List - Negative margin for full bleed */}
+                            <div className="flex gap-4 overflow-x-auto pb-6 -mx-6 px-6 scrollbar-hide">
+                                {cast.slice(0, 20).map(c => (
+                                    <div key={c.id} className="flex flex-col items-center min-w-[100px] md:min-w-[120px] group cursor-default">
+                                        <div className="relative w-20 h-20 md:w-24 md:h-24 mb-3 p-1 rounded-full border-2 border-transparent group-hover:border-[#46d369]/30 transition-all duration-300">
+                                            <img 
+                                                src={c.profile_path ? `${CAST_BASE}${c.profile_path}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=1f1f22&color=888&size=200`} 
+                                                className="w-full h-full rounded-full object-cover shadow-lg bg-[#1f1f22] group-hover:scale-105 transition-transform duration-300" 
+                                                alt={c.name}
+                                                loading="lazy"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col items-center text-center w-full">
+                                            <span className="text-xs md:text-sm font-bold text-gray-200 group-hover:text-white transition-colors line-clamp-1 w-full">
+                                                {c.name}
+                                            </span>
+                                            <span className="text-[10px] md:text-xs text-[#46d369] font-medium line-clamp-1 w-full mt-0.5">
+                                                {c.character || "Unknown"}
+                                            </span>
+                                        </div>
                                     </div>
                                 ))}
+                                {cast.length === 0 && <p className="text-gray-500 text-sm">No cast information available.</p>}
                             </div>
                         </div>
 
