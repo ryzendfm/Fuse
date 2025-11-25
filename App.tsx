@@ -6,6 +6,7 @@ import Sidebar from './components/Sidebar';
 import Hero from './components/Hero';
 import ContentGrid from './components/ContentGrid';
 import MovieUiModal from './components/MovieUiModal';
+import { HeroSkeleton, GridSkeleton } from './components/Skeletons';
 import { fetchDiscover, fetchSearch } from './services/tmdbService';
 import { ContentItem, MediaType } from './types';
 import { GENRES } from './constants';
@@ -92,7 +93,7 @@ const App: FC = () => {
                 if (data.results.length > 0 && !searchQuery) {
                     setHeroItem(data.results[0]);
                 } else if (reset && !searchQuery) {
-                     // If no results, keep previous hero or null, but typically shouldn't happen with correct IDs
+                     // If no results, keep previous hero or null
                      setHeroItem(data.results[0] || null);
                 }
             } else {
@@ -173,6 +174,11 @@ const App: FC = () => {
         return <Auth />;
     }
 
+    // Determine Logic:
+    // We want to show the Hero space if we are NOT searching.
+    // If data is loading and we aren't searching, we show a Skeleton Hero.
+    const shouldShowHeroSpace = !searchQuery;
+
     return (
         <div className="flex h-screen overflow-hidden bg-[#0e0e10] text-white font-inter">
             <Navbar 
@@ -200,14 +206,23 @@ const App: FC = () => {
                 {/* Content Logic based on Tab */}
                 {(activeTab === 'movie' || activeTab === 'tv') ? (
                     <>
-                        {/* Hero Section: Visible on Home AND Genre views, hidden on Search */}
-                        {!searchQuery && <Hero item={heroItem} onPlay={() => handleItemClick(heroItem!)} />}
+                        {/* Hero Section */}
+                        {shouldShowHeroSpace && (
+                            heroItem ? (
+                                <Hero item={heroItem} onPlay={() => handleItemClick(heroItem!)} />
+                            ) : (
+                                <HeroSkeleton />
+                            )
+                        )}
                         
-                        {/* Mobile Spacer for when toggle is hidden and we are in search/grid mode */}
-                        <div className={`md:hidden h-20 ${!searchQuery ? 'hidden' : 'block'}`}></div>
+                        {/* Mobile Spacer for when toggle is hidden and we are in search/grid mode or loading */}
+                        <div className={`md:hidden h-20 ${shouldShowHeroSpace ? 'hidden' : 'block'}`}></div>
 
-                        {/* Content Wrapper with Padding */}
-                        <div className={`relative z-10 px-4 md:px-8 ${!searchQuery ? 'mt-0' : 'pt-4'}`}>
+                        {/* Content Wrapper with Padding. 
+                            When Hero is hidden (search active), we need ample top padding to clear the fixed navbar. 
+                            pt-32 (128px) ensures the content starts well below the 70px navbar.
+                        */}
+                        <div className={`relative z-10 px-4 md:px-8 ${shouldShowHeroSpace ? 'mt-0' : 'pt-32 md:pt-36'}`}>
                             
                             {/* Filter/Header Section */}
                             <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
@@ -216,28 +231,36 @@ const App: FC = () => {
                                 </h2>
                                 
                                 {/* Mobile Genre Scroll - Desktop handled by sidebar */}
-                                <div className="flex md:hidden gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                                    <button 
-                                        onClick={() => handleGenreClick(undefined)}
-                                        className={`text-sm font-medium transition-colors whitespace-nowrap px-3 py-1 rounded-lg ${!activeGenre ? 'bg-white text-black' : 'bg-[#1f1f22] text-gray-400 hover:bg-[#333] hover:text-white'}`}
-                                    >
-                                        All
-                                    </button>
-                                    {GENRES.map(g => (
+                                {!searchQuery && (
+                                    <div className="flex md:hidden gap-4 overflow-x-auto pb-2 scrollbar-hide">
                                         <button 
-                                            key={g.id}
-                                            onClick={() => handleGenreClick(g.id)}
-                                            className={`text-sm font-medium transition-colors whitespace-nowrap px-3 py-1 rounded-lg ${activeGenre === g.id ? 'bg-white text-black' : 'bg-[#1f1f22] text-gray-400 hover:bg-[#333] hover:text-white'}`}
+                                            onClick={() => handleGenreClick(undefined)}
+                                            className={`text-sm font-medium transition-colors whitespace-nowrap px-3 py-1 rounded-lg ${!activeGenre ? 'bg-white text-black' : 'bg-[#1f1f22] text-gray-400 hover:bg-[#333] hover:text-white'}`}
                                         >
-                                            {g.name}
+                                            All
                                         </button>
-                                    ))}
-                                </div>
+                                        {GENRES.map(g => (
+                                            <button 
+                                                key={g.id}
+                                                onClick={() => handleGenreClick(g.id)}
+                                                className={`text-sm font-medium transition-colors whitespace-nowrap px-3 py-1 rounded-lg ${activeGenre === g.id ? 'bg-white text-black' : 'bg-[#1f1f22] text-gray-400 hover:bg-[#333] hover:text-white'}`}
+                                            >
+                                                {g.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
-                            <ContentGrid items={contentList} onItemClick={handleItemClick} />
+                            {/* Content Grid with Skeleton Loader */}
+                            {loading && page === 1 ? (
+                                <GridSkeleton />
+                            ) : (
+                                <ContentGrid items={contentList} onItemClick={handleItemClick} />
+                            )}
 
-                            {loading && (
+                            {/* Load More Spinner (only for pagination) */}
+                            {loading && page > 1 && (
                                 <div className="py-12 flex justify-center w-full">
                                     <div className="animate-spin w-8 h-8 border-4 border-[#333] border-t-[#46d369] rounded-full"></div>
                                 </div>
